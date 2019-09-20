@@ -24,7 +24,7 @@ A process is a bundle of computing power and resources used for the execution of
 
 `In Node.js, everything runs in parallel, except the code.`
 
-Node gets away with the single threaded model by using non-blocking techniques.
+Node gets away with the single threaded model by using non-blocking techniques. Your code should do what it needs to do, then quickly hand control back over to the event loop so Node.js can work on something else.
 
 ### STRICT MODE
 
@@ -123,3 +123,73 @@ Posted data comes into the http server via chunks. Data chunks allow information
 To collect all the posted data with a server, you need to listen for each piece of data received and arrange the data yourself. The request listens for a specific data event req.on('data') to be triggered when the data is received for a specific request. You need to define a new array `body` to sequentially add the data chunks to it as they arrive at the server.
 
 ![Readable Streams](https://raw.githubusercontent.com/ashwanth1109/nodejs-practice/master/assets/readable-streams.png)
+
+### File System: Watching a file for changes
+
+```js
+// watcher.js
+"use strict"; // disables certain problematic JS features
+
+const fs = require("fs"); // pulls in the built-in filesystem module
+
+fs.watch("target.txt", () => console.log("File has been changed"));
+
+console.log('Now watching "target.txt" for changes . . .');
+```
+
+Here, `watcher.js` is at the same level as `target.txt`. A module is a self-contained bit of JavaScript that provides functionality to be used elsewhere.
+
+The `fs module` provides a watch method which takes a path to a file and a callback which gets triggered everytime the file's content changes. In JS, functions are first-class citizens, which means they can be assigned to variables and passed as parameters to other functions.
+
+To run this program, Node does the following:
+
+- Loads the script, all the way to the last line
+- Starts waiting for something to happen (fs.watch)
+- Executes a callback when the change is detected
+- Determines program is not complete and resumes waiting
+
+The event loop spins until there is nothing left to do.
+
+#### CLI ARGUMENT
+
+```js
+// watcher-argv.js
+
+"use strict";
+
+const fs = require("fs");
+
+const filename = process.argv[2];
+
+if (!filename) throw Error("File specified does not exist");
+
+fs.watch(filename, () => console.log("File changed"));
+
+console.log("Now watching file for changes. . .");
+```
+
+This program is run with `node watcher-argv.js​​ ​​target.txt`. It uses process.argv (argument vector) to access the inline command line arguments.
+
+#### ERROR HANDLING
+
+If file doesn't exist, we throw an error.
+
+```
+internal/fs/watchers.js:173
+    throw error;
+    ^
+
+Error: ENOENT: no such file or directory, watch 'target'
+    at FSWatcher.start (internal/fs/watchers.js:165:26)
+    at Object.watch (fs.js:1258:11)
+    at Object.<anonymous> (/home/ashwanth/Desktop/GITHUB/nodejs-practice/file-system/watcher-argv.js:9:4)
+    at Module._compile (internal/modules/cjs/loader.js:776:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:787:10)
+    at Module.load (internal/modules/cjs/loader.js:653:32)
+    at tryModuleLoad (internal/modules/cjs/loader.js:593:12)
+    at Function.Module._load (internal/modules/cjs/loader.js:585:3)
+    at Function.Module.runMain (internal/modules/cjs/loader.js:829:12)
+    at startup (internal/bootstrap/node.js:283:19)
+```
+
+Any unhandled exception thrown in Node.js will halt the process. Processes are important in Node. It’s pretty common in Node.js development to spawn separate processes as a way of breaking up work, rather than putting everything into one big Node.js program.

@@ -1,0 +1,14 @@
+{
+  "name": "01_getting_started",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ashwanth A R <ashwanth1109@gmail.com> (ashwanth-ar.web.app)",
+  "license": "ISC",
+  "dependencies": {
+    "cities": "^2.0.0"
+  }
+}

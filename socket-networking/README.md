@@ -119,3 +119,41 @@ $ nc -U /tmp/watcher.sock
 ```
 
 Unix sockets can be faster than TCP sockets because they don't involve networking hardware.
+
+### Implementing a Messaging Protocol
+
+A protocol is a set of rules that defines how endpoints in a system communicate. Moving from the plain text based protocol we have been using so far, we want to switch to an improved, computer accessible protocol - JSON.
+
+```js
+// net-watcher-json.js
+"use strict";
+
+const fs = require("fs");
+const net = require("net");
+const filename = process.argv[2];
+
+if (!filename) throw Error("Error: No file name specified");
+
+net
+  .createServer(connection => {
+    // log start
+    console.log("Subscriber has connected");
+    connection.write(
+      JSON.stringify({ type: "watching", file: filename }) + "\n"
+    );
+
+    // watcher
+    const watcher = fs.watch(filename, () =>
+      connection.write(
+        `${JSON.stringify({ type: "changed", timestamp: Date.now() })} \n`
+      )
+    );
+
+    // clean up
+    connection.on("close", () => {
+      console.log("Subscriber has disconnected");
+      watcher.close();
+    });
+  })
+  .listen(3000, () => console.log("Listening for subscribers"));
+```

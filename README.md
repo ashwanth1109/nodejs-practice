@@ -7,6 +7,13 @@
 - [Introduction](https://github.com/ashwanth1109/nodejs-practice#introduction)
 - [File System](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#file-system-watching-a-file-for-changes)
   - [CLI Arguments](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#cli-argument)
+  - [Error Handling](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#error-handling)
+  - [Spawning a child process](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#spawning-a-child-process)
+  - [Capturing data from an EventEmitter](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#capturing-data-from-an-eventemitter)
+  - [Reading and Writing Files Asynchronously](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#reading-and-writing-files-asynchronously)
+  - [Creating Read and Write Streams](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#creating-read-and-write-streams)
+  - [Synchronous File Access](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#synchronous-file-access)
+  - [Sync vs Async (Blocking vs Non-blocking)](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#sync-vs-async-blocking-vs-non-blocking)
 
 ### INTRODUCTION
 

@@ -267,3 +267,39 @@ ls.on("close", () => {
   console.log([parts[0], parts[4], parts[8]]);
 });
 ```
+
+#### Reading and Writing Files Asynchronously
+
+```js
+// read-simple.js
+
+"use strict";
+
+const fs = require("fs");
+
+fs.readFile("target.txt", (err, data) => {
+  if (err) throw ("Error reading file:", err);
+  console.log(data.toString());
+});
+```
+
+Here, we read the entire file at once which is a simpler approach that works for small files. Better approaches involve creating streams or staging content in buffers.
+
+If the file read was successful, the `err` will be null and if there were errors it will contain an `Error` object and we throw it. An uncaught exception in Node will halt the program by escaping the event loop.
+
+Similarly, for writing a file:
+
+```js
+// write-simple.js
+
+"use strict";
+
+const fs = require("fs");
+
+fs.writeFile("target.txt", "Hello file write", err => {
+  if (err) throw err;
+  console.log("File content written");
+});
+```
+
+The program writes the text into the file, creating the file if it doesn't exist.

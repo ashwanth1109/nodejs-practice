@@ -336,3 +336,32 @@ require("fs")
 We use the `process.stdout.write` to echo data rather than using console. The incoming data chunks already contain any newline characters from the input file.
 
 We can chain our event listeners because the return value of `on()` is the same `EventEmitter` object.
+
+#### Synchronous File Access
+
+The async methods we've used so far, perform their IO duties, waiting in the background to invoke callbacks later.
+
+There are methods (like `readFileSync`) which lets you perform these operations synchronously but it comes at a substantial cost. In sync methods, the process blocks until the IO finishes.
+
+```js
+// read-sync.js
+"use strict";
+
+const fs = require("fs");
+const data = fs.readFileSync("target.txt");
+process.stdout.write(data.toString());
+```
+
+The return value of `readFileSync()` is a Buffer object.
+
+#### Explore More:
+
+The `fs` module comes with many other methods that map onto POSIX conventions. POSIX is a family of standards for interoperability between operating systems which includes file system utilities.
+
+#### Sync vs Async (Blocking vs Non-blocking)
+
+Given that sync is blocking, it might feel like a bad idea to ever use it. However, in the initialization phase, as the program is getting set up, bringing in libraries, reading configuration parameters and doing other mission critical tasks, you can consider synchronous file access. This is because in initialization, if something goes wrong, its better to fail fast since not much can be done.
+
+The `require()` method is an example of synchronous file access during the initialization phase.
+
+In the operation phase, the program churns through the event loop and synchronous file access methods should never be used here.

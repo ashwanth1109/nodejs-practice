@@ -73,3 +73,40 @@ $ nc localhost 3000
 We use `netcat`, a socket utility program to subscribe to the service and listen to the file for changes. You can have multiple terminals (subscribers) connect to the service.
 
 TCP sockets are useful for communicating between networked computers. But you can also have processes on the same computer communicating using Unix sockets.
+
+### Listening on Unix sockets
+
+```js
+// net-watcher-unix.js
+"use strict";
+
+const fs = require("fs");
+const net = require("net");
+const filename = process.argv[2];
+
+if (!filename) throw Error("Error: No file name specified");
+
+net
+  .createServer(connection => {
+    // log start
+    console.log("Subscriber has connected");
+    connection.write(`Now watching ${filename} for changes`);
+
+    // watcher
+    const watcher = fs.watch(filename, () =>
+      connection.write(`File changed: ${new Date()} \n`)
+    );
+
+    // clean up
+    connection.on("close", () => {
+      console.log("Subscriber has disconnected");
+      watcher.close();
+    });
+  })
+  .listen("/tmp/watcher.sock", () => console.log("Listening for subscribers"));
+```
+
+Run the program: `$ node net-watcher-unix.js target.txt`
+Connect a client: `$ nc -U /tmp/watcher.sock`
+
+Unix sockets can be faster than TCP sockets because they don't involve networking hardware.

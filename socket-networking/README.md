@@ -1,7 +1,7 @@
 # Networking with Sockets
 
 Networked services: (1) Connect endpoints (2) Transmit information between them.
-Regardless of information, a connection must always be made.
+Regardless of the type of information, a connection must always be made.
 
 A TCP (Transmission Control Protocol) socket connection has two endpoints - one endpoint `binds` to a numbered port and another that `connects` to a port. In Node, the `net` module provides the `bind` and `connect` methods.
 

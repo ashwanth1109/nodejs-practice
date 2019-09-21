@@ -2,6 +2,12 @@
 
 `While functionality is an asset, code is a liability. The best line of code is the one you never had to write.`
 
+## CONTENTS:
+
+- [Introduction](https://github.com/ashwanth1109/nodejs-practice#introduction)
+- [File System](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#file-system-watching-a-file-for-changes)
+  - [CLI Arguments](https://github.com/ashwanth1109/nodejs-practice/tree/master/file-system#cli-argument)
+
 ### INTRODUCTION
 
 A platform for interpreting JS code and running applications. Built with Google Chrome's JS engine (interpreter).

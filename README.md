@@ -193,3 +193,77 @@ Error: ENOENT: no such file or directory, watch 'target'
 ```
 
 Any unhandled exception thrown in Node.js will halt the process. Processes are important in Node. It’s pretty common in Node.js development to spawn separate processes as a way of breaking up work, rather than putting everything into one big Node.js program.
+
+#### Spawning a child process
+
+```js
+// watcher-spawn.js
+
+"use strict";
+
+const fs = require("fs");
+const spawn = require("child_process").spawn;
+const filename = process.argv[2];
+
+if (!filename) throw Error("File specified does not exist");
+
+fs.watch(filename, () => {
+  const ls = spawn("ls", ["-l", "-h", filename]);
+  ls.stdout.pipe(process.stdout);
+});
+
+console.log("Now watching file for changes. . .");
+```
+
+The 1st parameter to spawn is the name of the program we wish to execute. In our case, it's ls. The 2nd parameter is an array of command-line arguments which contains the flags and the target filename.
+
+The object returned by spawn() is a ChildProcess. It's stdin, stdout and stderr are Streams that can be used to read or write data. We want to send the standard output from the child process directly to our own standard output stream. This is what the pipe() method does.
+
+#### Capturing data from an EventEmitter
+
+EventEmitter provides a channel for events to be dispatched and listeners to be notified. Streams amongst many objects, inherits from EventEmitter.
+
+```js
+// watcher-spawn-parse.js
+
+"use strict";
+
+const fs = require("fs");
+const spawn = require("child_process").spawn;
+const filename = process.argv[2];
+
+if (!filename) throw Error("File specified does not exist");
+
+fs.watch(filename, () => {
+  const ls = spawn("ls", ["-l", "-h", filename]);
+  let output = "";
+
+  ls.stdout.on("data", chunk => (output += chunk));
+
+  ls.on("close", () => {
+    const parts = output.split(/\s+/);
+    console.log([parts[0], parts[4], parts[8]]);
+  });
+});
+
+console.log("Now watching file for changes. . .");
+```
+
+The new callback starts out the same as before, creating a child process and assigning it to a variable called ls. It also creates an output variable, which will buffer the output coming from the child process.
+
+Since the Stream class inherits from EventEmitter, we can listen for events from the child process’s standard output stream:
+
+```
+ls.stdout.on(​'data'​, chunk => output += chunk);
+```
+
+The on() method helps us listen to data coming out of the stream. Each time we get a chunk of data, we append it to our output. A Buffer is Node's way of representing binary data. It points to a blob of memory allocated by Node.js’s native core, outside of the JavaScript engine. Buffers can’t be resized and they require encoding and decoding to convert to and from JavaScript strings. Any time you add a non-string to a string in JavaScript, the runtime will implicitly call the object’s toString() method. This means copying the content into Node's heap using the default encoding (UTF-8). Shuttling data this way can be a slow process, so it's often better to work with Buffers directly.
+
+We can add an `on close` event listener to the child process which gets triggered after a child process has exited and all its streams have been flushed.
+
+```js
+ls.on("close", () => {
+  const parts = output.split(/\s+/); // parse the output data here
+  console.log([parts[0], parts[4], parts[8]]);
+});
+```

@@ -303,3 +303,36 @@ fs.writeFile("target.txt", "Hello file write", err => {
 ```
 
 The program writes the text into the file, creating the file if it doesn't exist.
+
+#### Creating Read and Write Streams
+
+Running executable files directly in node:
+
+```js
+#!/usr/bin/env node // the #! makes it possible to execute on Unix
+"use strict";
+
+require("fs")
+  .createReadStream(process.argv[2])
+  .pipe(process.stdout);
+```
+
+```
+$ ​​chmod​​ ​​+x​​ ​​cat.js
+$ ​​./cat.js​​ ​​target.txt
+```
+
+```js
+// read-stream.js
+
+"use strict";
+
+require("fs")
+  .createReadStream(process.argv[2])
+  .on("data", chunk => process.stdout.write(chunk))
+  .on("error", err => process.stderr.write(`ERROR: ​${err.message}​\n`​));
+```
+
+We use the `process.stdout.write` to echo data rather than using console. The incoming data chunks already contain any newline characters from the input file.
+
+We can chain our event listeners because the return value of `on()` is the same `EventEmitter` object.

@@ -106,7 +106,16 @@ net
   .listen("/tmp/watcher.sock", () => console.log("Listening for subscribers"));
 ```
 
-Run the program: `$ node net-watcher-unix.js target.txt`
-Connect a client: `$ nc -U /tmp/watcher.sock`
+Run the program:
+
+```
+$ node net-watcher-unix.js target.txt
+```
+
+Connect a client:
+
+```
+$ nc -U /tmp/watcher.sock
+```
 
 Unix sockets can be faster than TCP sockets because they don't involve networking hardware.

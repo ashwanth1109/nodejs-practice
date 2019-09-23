@@ -125,7 +125,7 @@ Unix sockets can be faster than TCP sockets because they don't involve networkin
 A protocol is a set of rules that defines how endpoints in a system communicate. Moving from the plain text based protocol we have been using so far, we want to switch to an improved, computer accessible protocol - JSON.
 
 ```js
-// net-watcher-json.js
+// net-watcher-json-server.js
 "use strict";
 
 const fs = require("fs");
@@ -157,3 +157,27 @@ net
   })
   .listen(3000, () => console.log("Listening for subscribers"));
 ```
+
+### Creating Socket Client Connections
+
+```js
+// net-watcher-json-client.js
+"use strict";
+
+const net = require("net");
+const client = net.connect({ port: 3000 });
+
+client.on("data", data => {
+  const message = JSON.parse(data);
+  if (message.type === "watching")
+    console.log(`Now watching file ${message.file}`);
+  else if (message.type === "changed")
+    console.log(`File Changed: ${new Date(message.timestamp)}`);
+  else console.log(`Unrecognized message type ${message.type}`);
+});
+```
+
+We can also use `net` to write a client program in Node to receive json messages from our `net-watcher-json-server` program
+. The client object is a Socket, just like the incoming connection on the server side.
+
+This program only listens for `on()` data events, not `end()` or `error()` events. We need to refactor our code to handle this.

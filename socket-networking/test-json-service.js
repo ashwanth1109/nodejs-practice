@@ -4,8 +4,8 @@
 const server = require("net").createServer(conn => {
   console.log("Subscriber connected");
 
-  const firstChunk = '{"type":"changed","timesta';
-  const secondChunk = 'mp":1450694370094}​​​​n';
+  const firstChunk = `{"type":"changed","timesta`;
+  const secondChunk = `mp":1450694370094}\n​​​​`;
 
   conn.write(firstChunk);
 

@@ -218,3 +218,64 @@ In the above code, we are simulating a network problem of broken connection with
 The client program attempts to send half the JSON through the parser and fails throwing a `SyntaxError: Unexpected token`.
 So, any message that arrives as multiple data events will crash the client (which is especially the case with larger data transfers).
 We want the client to buffer the data that arrives and then handle the message.
+
+### Extending Core Classes in Custom Modules
+
+```js
+// ldj-client.js
+"use strict";
+
+const EventEmitter = require("events").EventEmitter;
+
+// under the hood JS uses prototypal inheritance
+class LDJClient extends EventEmitter {
+  // stream parameter is an object that emits data events
+  // such as a Socket Connection
+  constructor(stream) {
+    super(); // invoke EventEmitter's constructor function
+
+    let buffer = "";
+    stream.on("data", data => {
+      buffer += data; // capture incoming data
+      let boundary = buffer.indexOf("\n"); // check for message separator
+      while (boundary !== -1) {
+        // if data is complete
+        const input = buffer.substring(0, boundary); // extract input
+        buffer = buffer.substring(boundary + 1); // remove input from buffer
+        this.emit("message", JSON.parse(input)); // emit input as a message
+        boundary = buffer.indexOf("\n"); // look for next message separator
+      }
+    });
+  }
+
+  // create static method to create an instance of class
+  static connect(stream) {
+    return new LDJClient(stream);
+  }
+}
+
+module.exports = LDJClient;
+```
+
+We create a class called `LDJClient` which extends from the `EventEmitter` class.
+Then we capture incoming data in a buffer, look for a message separator in order to extract individual messages.
+As soon as an individual message is extracted, we emit a message event with the parsed JSON input message.
+
+This emitted data is then used in our client as follows.
+
+```js
+// net-watcher-ldj-client.js
+"use strict";
+
+const netClient = require("net").connect({ port: 3000 });
+const ldjClient = require("./lib/ldj-client").connect(netClient);
+
+ldjClient.on("message", message => {
+  if (message.type === "watching") console.log(`Now watching: ${message.file}`);
+  else if (message.type === "changed")
+    console.log(`File Changed: ${new Date(message.timestamp)}`);
+  else throw Error(`Unrecognized message type: ${message.type}`);
+});
+```
+
+Thus we gracefully handle network errors and make our client more robust when consuming the service.

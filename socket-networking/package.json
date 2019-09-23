@@ -1,0 +1,18 @@
+{
+  "name": "socket-networking",
+  "version": "1.0.0",
+  "description": "Networked services: (1) Connect endpoints (2) Transmit information between them. Regardless of the type of information, a connection must always be made.",
+  "main": "basic-server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "Ashwanth A R <ashwanth1109@gmail.com> (ashwanth-ar.web.app)",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^6.2.0"
+  }
+}

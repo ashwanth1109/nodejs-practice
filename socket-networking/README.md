@@ -279,3 +279,57 @@ ldjClient.on("message", message => {
 ```
 
 Thus we gracefully handle network errors and make our client more robust when consuming the service.
+
+### Writing Mocha Unit Tests
+
+```js
+// ldj-client-test.js
+"use strict";
+
+const assert = require("assert");
+const { EventEmitter } = require("events");
+const LDJClient = require("../lib/ldj-client");
+
+describe("LDJClient", () => {
+  let stream = null;
+  let client = null;
+
+  beforeEach(() => {
+    stream = new EventEmitter();
+    client = new LDJClient(stream);
+  });
+
+  it("should emit a message event from a single data event", done => {
+    client.on("message", message => {
+      assert.deepEqual(message, { foo: "bar" });
+      done();
+    });
+    stream.emit("data", `{"foo":"bar"}\n`);
+  });
+});
+```
+
+To run our basic unit test, we first pull in Node's built in `assert` module.
+This modules contains useful functions for comparing values.
+
+We use Mocha's `describe` method to create a named context for our test and pass in a callback with the test content.
+We use Mocha's `beforeEach` hook to initialize our stream and ldj client.
+Finally, we call the `it` method to test a specific behavior case of the class.
+Once its done, it will invoke the done callback signalling to Mocha that the test has completed successfully.
+
+The test we are running sets up a message event handler on the client and emits data on the stream to be captured by the client.
+
+More Test Cases:
+
+```js
+it("should emit a message event from split data events", done => {
+  client.on("message", message => {
+    assert.deepEqual(message, { foo: "bar" });
+    done();
+  });
+  stream.emit("data", '{"foo":');
+  process.nextTick(() => stream.emit("data", '"bar"}\n'));
+});
+```
+
+This test breaks up the message into two parts to be emitted from the stream one after another.

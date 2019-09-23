@@ -1,4 +1,4 @@
-# NODE.JS
+# NODE.JS 8 THE RIGHT WAY by Jim Wilson
 
 `While functionality is an asset, code is a liability. The best line of code is the one you never had to write.`
 

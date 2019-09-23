@@ -181,3 +181,40 @@ We can also use `net` to write a client program in Node to receive json messages
 . The client object is a Socket, just like the incoming connection on the server side.
 
 This program only listens for `on()` data events, not `end()` or `error()` events. We need to refactor our code to handle this.
+
+### Understanding the Message Boundary Problem
+
+Networked programs in Node communicate by passing messages, which can arrive all at once, but mostly arrives in pieces split into distinct data events.
+
+```js
+// test-json-service.js
+"use strict";
+
+const server = require("net").createServer(conn => {
+  console.log("Subscriber connected");
+
+  const firstChunk = '{"type":"changed","timesta';
+  const secondChunk = 'mp":1450694370094}​​​​n';
+
+  conn.write(firstChunk);
+
+  const timer = setTimeout(() => {
+    conn.write(secondChunk);
+    conn.end();
+  }, 100);
+
+  conn.on("end", () => {
+    clearTimeout(timer);
+    console.log("Subscriber disconnected");
+  });
+});
+
+server.listen(3000, () => {
+  console.log("Server up and running");
+});
+```
+
+In the above code, we are simulating a network problem of broken connection with split data.
+The client program attempts to send half the JSON through the parser and fails throwing a `SyntaxError: Unexpected token`.
+So, any message that arrives as multiple data events will crash the client (which is especially the case with larger data transfers).
+We want the client to buffer the data that arrives and then handle the message.

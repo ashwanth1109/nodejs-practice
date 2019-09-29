@@ -18,3 +18,9 @@ requester.connect("tcp://localhost:3000");
 // send a request for content
 console.log(`Sending a request for ${filename}`);
 requester.send(JSON.stringify({ path: filename }));
+
+// make multiple requests for content
+// for (let i = 1; i <= 5; i++) {
+//   console.log(`Sending a request for ${filename}`);
+//   requester.send(JSON.stringify({ path: filename }));
+// }

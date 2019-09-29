@@ -142,3 +142,16 @@ requester.send(JSON.stringify({ path: filename }));
 ```
 
 Next, we create a 0MQ requester socket. We have it listen for incoming message events and interpret the data as a JSON serialized reponse. After setting up our listener, we make a request by connecting to the responder socket over TCP and then sending our request with the filename.
+
+### Trading Synchronicity for Scale
+
+There is a tradeoff when using 0MQ REP/REQ socket pairs with Node. Each endpoint on the application operates on only one request or one response at a time. There is no parallelism.
+
+```js
+for (let i = 1; i <= 5; i++) {
+  console.log(`Sending a request for ${filename}`);
+  requester.send(JSON.stringify({ path: filename }));
+}
+```
+
+When we make multiple requests on our requester, we notice that our responder sends a response before even becoming aware of the next queued request. Hence, a simple REQ/REP pair is not suitable for a high performance Node application. We instead need a cluster of Node processes using more advanced 0MQ socket types to scale up our throughput.

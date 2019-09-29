@@ -155,3 +155,29 @@ for (let i = 1; i <= 5; i++) {
 ```
 
 When we make multiple requests on our requester, we notice that our responder sends a response before even becoming aware of the next queued request. Hence, a simple REQ/REP pair is not suitable for a high performance Node application. We instead need a cluster of Node processes using more advanced 0MQ socket types to scale up our throughput.
+
+### Routing and Dealing Messages
+
+For parallel message processing, 0MQ provides more advanced socket types - ROUTER, DEALER.
+
+A ROUTER socket is like a REP (responder) socket but can handle multiple messages simultaneously. It remembers which connection each request came from and will route reply messages accordingly. A ROUTER socket uses the sequence of low-overhead frames in the ZMTP protocol to route a reply message back to each connection that issued the request.
+
+```js
+const router = zmq.socket("router");
+router.on("message", (...frames) => {
+  // use frames
+});
+```
+
+The message handler for a router takes an array of frames.
+
+A DEALER socket is like a REQ (requester) socket but can send multiple requests simultaneously.
+
+```js
+​const​ router = zmq.socket(​'router'​);
+const dealer = zmq.socket("dealer");
+router.on(​'message'​, (...frames) => dealer.send(frames));
+dealer.on(​'message'​, (...frames) => router.send(frames));
+```
+
+Here, we have a Node with a ROUTER socket and a DEALER socket. Either socket sends a message to the other socket, whenever either receives a message. You can have multiple REQ/REP sockets that connect to the ROUTER/DEALER pair which can distribute the requests and responses accordingly.

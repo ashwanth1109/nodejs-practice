@@ -68,3 +68,77 @@ subscriber.connect("tcp://localhost:3000");
 
 The subscriber object inherits from the EventEmitter class and emits a message event when it receives it from the publisher.
 The endpoints can be started in any order and they will wait till its counterpart is ready for communication.
+
+### Responding to Requests
+
+The request response pattern is very common in Node.
+
+```js
+// zmq-filer-rep.js
+"use strict";
+
+const fs = require("fs");
+const zmq = require("zeromq");
+
+// socket to reply to client requests
+const responder = zmq.socket("rep");
+
+// handle incoming requests
+responder.on("message", data => {
+  // parse the incoming message
+  const request = JSON.parse(data);
+  console.log(`Received request: ${request.path}`);
+
+  // read the file and reply with content
+  fs.readFile(request.path, (err, content) => {
+    console.log("Sending response content");
+    responder.send(
+      JSON.stringify({
+        content: content.toString(),
+        timestamp: Date.now(),
+        pid: process.pid
+      })
+    );
+  });
+});
+
+// bind to TCP port
+responder.bind("tcp://127.0.0.1:3000", err => {
+  console.log("Listening for zmq requesters");
+});
+
+// close responder when the process ends
+process.on("SIGINT", () => {
+  console.log("Shutting down");
+  responder.close();
+});
+```
+
+We create a 0MQ responder socket and use it to respond to incoming requests. We bind the socket to the loopback interface (127.0.0.1) to wait for connections. This makes the responder the stable endpoint of the REQ/REP pair.
+
+When a message event happens, we parse out the request from the raw data. We asynchronously retrieve the requested file's content. After we retrieve it, we respond with the file's content, the date and the process id of the Node process.
+
+```js
+// zmq-filer-req.js
+"use strict";
+
+const zmq = require("zeromq");
+const filename = process.argv[2];
+
+// create a request endpoint
+const requester = zmq.socket("req");
+
+// handle replies from the responder
+requester.on("message", data => {
+  const response = JSON.parse(data);
+  console.log("Received response", response);
+});
+
+requester.connect("tcp://localhost:3000");
+
+// send a request for content
+console.log(`Sending a request for ${filename}`);
+requester.send(JSON.stringify({ path: filename }));
+```
+
+Next, we create a 0MQ requester socket. We have it listen for incoming message events and interpret the data as a JSON serialized reponse. After setting up our listener, we make a request by connecting to the responder socket over TCP and then sending our request with the filename.

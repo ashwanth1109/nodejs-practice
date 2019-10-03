@@ -181,3 +181,9 @@ dealer.on(​'message'​, (...frames) => router.send(frames));
 ```
 
 Here, we have a Node with a ROUTER socket and a DEALER socket. Either socket sends a message to the other socket, whenever either receives a message. You can have multiple REQ/REP sockets that connect to the ROUTER/DEALER pair which can distribute the requests and responses accordingly.
+
+### Clustering Node.js Processes
+
+In multi-threaded systems, doing more work in parallel means spinning up more threads. But Node uses a single-threaded event loop, so to take advantage of multiple cores in the same computer, you need to spin up more processes.
+
+This is called clustering - a useful technique for scaling your Node application when there's unused CPU capacity available.
